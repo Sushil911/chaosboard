@@ -11,13 +11,23 @@ import (
 	"time"
 )
 
+func listExperiments(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func createExperiments(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Welcome to Chaosboard - v0.1 \n")
 		fmt.Fprintf(w, "GET /healthz - check health of your container \n")
-		fmt.Fprintf(w, "GET /chaos - check the resiliency of your deployed containers \n")
+		fmt.Fprintf(w, "GET /api/experiments - list all chaos experiments \n")
+		fmt.Fprintf(w, "POST /api/experiments - start chaos experiments \n")
+
 	})
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -25,9 +35,8 @@ func main() {
 		w.Write([]byte("ok \n"))
 	})
 
-	mux.HandleFunc("/chaos", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Coming soon \n")
-	})
+	mux.HandleFunc("GET /api/experiments", listExperiments)
+	mux.HandleFunc("POST /api/experiments", createExperiments)
 
 	server := &http.Server{Addr: ":8080", Handler: mux}
 
