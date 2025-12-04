@@ -2,21 +2,103 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
+
+	"github.com/google/uuid"
+)
+
+type Experiments struct {
+	ID        string    `json:"id"`
+	Type      string    `json:"type"`
+	Duration  int       `json:"duration"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+var (
+	store   = make(map[string]Experiments)
+	storeMu sync.RWMutex
 )
 
 func listExperiments(w http.ResponseWriter, r *http.Request) {
+	storeMu.RLock()
+	defer storeMu.RUnlock()
 
+	list := make([]Experiments, 0, len(store))
+	for _, e := range store {
+		list = append(list, e)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(list)
 }
 
 func createExperiments(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Type     string `json:"type"`
+		Duration int    `json:"duration"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Invalid values", http.StatusBadRequest)
+		return
+	}
 
+	if req.Type == "" {
+		http.Error(w, "Invalid experiment type. Please enter correct experiment", http.StatusBadRequest)
+		return
+	}
+
+	if req.Duration <= 0 {
+		http.Error(w, "Please enter time more than 0 seconds", http.StatusBadRequest)
+		return
+	}
+
+	exp := Experiments{
+		ID:        uuid.New().String(),
+		Type:      req.Type,
+		Duration:  req.Duration,
+		Status:    "running",
+		CreatedAt: time.Now(),
+	}
+
+	storeMu.Lock()
+	store[exp.ID] = exp
+	storeMu.Unlock()
+
+	go runExperiments(exp)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(exp)
+}
+
+func runExperiments(e Experiments) {
+	log.Printf("[CHAOS START] id=%s type=%s duration=%ds", e.ID, e.Type, e.Duration)
+	switch e.Type {
+	case "cpu-hog":
+		deadline := time.Now().Add(time.Duration(e.Duration) * time.Second)
+		for time.Now().Before(deadline) {
+			_ = 1<<63 - 1
+		}
+	}
+	storeMu.Lock()
+	exp, ok := store[e.ID]
+	if ok {
+		exp.Status = "completed"
+		store[e.ID] = exp
+	}
+	storeMu.Unlock()
+
+	log.Printf("[CHAOS END] id=%s", e.ID)
 }
 
 func main() {
