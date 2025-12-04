@@ -63,8 +63,7 @@ func createExperiments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Duration <= 0 {
-		http.Error(w, "Please enter time more than 0 seconds", http.StatusBadRequest)
-		return
+		req.Duration = 10
 	}
 
 	exp := Experiments{
