@@ -38,7 +38,12 @@ func listExperiments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(list)
+	err := json.NewEncoder(w).Encode(list)
+	if err != nil {
+		log.Printf("Failed to encode experiments: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func createExperiments(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +83,11 @@ func createExperiments(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(exp)
+	err = json.NewEncoder(w).Encode(exp)
+	if err != nil {
+		log.Printf("Failed to encode experiment response: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 func runExperiments(e Experiments) {
