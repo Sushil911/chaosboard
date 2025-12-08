@@ -26,14 +26,14 @@ curl -X POST http://localhost:8080/api/experiments \
 - Now I’m going back to basics so I never get confused again.This repo (and my other one https://github.com/Sushil911/go-devops-mastery) is me building in public; every mistake, every tiny step.
 
 ## What I plan to add (when I figure it out)
-Actually create CPU-hog pods in Kubernetes
-Add more experiments
-Maybe a proper CLI later
-Eventually apply for LFX Mentorship with this
+- Actually create CPU-hog pods in Kubernetes
+- Add more experiments
+- Maybe a proper CLI later
+- Eventually apply for LFX Mentorship with this
 
-PRs, advice, or even “this is wrong because of this this this reason” comments are welcome.
-MIT © Sushil - December 2025
-Still grinding.
+PRs, advice, or even “this is wrong because of this this this reason” comments are welcome. 
+
+Sushil - December 2025
 
 
 
