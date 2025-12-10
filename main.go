@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	bolt "go.etcd.io/bbolt"
 )
 
 type Experiments struct {
@@ -24,9 +25,54 @@ type Experiments struct {
 }
 
 var (
+	db      *bolt.DB
 	store   = make(map[string]Experiments)
 	storeMu sync.RWMutex
 )
+
+const (
+	dbFile = "chaosboard.db"
+	bucket = "experiments"
+)
+
+func initDB() error {
+	var err error
+	db, err = bolt.Open(dbFile, 0666, nil)
+	if err != nil {
+		return err
+	}
+	return db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		return err
+	})
+}
+
+func saveToDB(exp Experiments) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucket))
+		data, _ := json.Marshal(exp)
+		return b.Put([]byte(exp.ID), data)
+	})
+}
+
+func loadFromDB() error {
+	return db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucket))
+		if b == nil {
+			return nil
+		}
+		return b.ForEach(func(k, v []byte) error {
+			var exp Experiments
+			if err := json.Unmarshal(v, &exp); err != nil {
+				return err
+			}
+			storeMu.Lock()
+			store[exp.ID] = exp
+			storeMu.Unlock()
+			return nil
+		})
+	})
+}
 
 func listExperiments(w http.ResponseWriter, r *http.Request) {
 	storeMu.RLock()
@@ -78,6 +124,11 @@ func createExperiments(w http.ResponseWriter, r *http.Request) {
 	store[exp.ID] = exp
 	storeMu.Unlock()
 
+	err = saveToDB(exp)
+	if err != nil {
+		log.Printf("failed to save to db: %v", err)
+	}
+
 	go runExperiments(exp)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -103,6 +154,7 @@ func runExperiments(e Experiments) {
 	if ok {
 		exp.Status = "completed"
 		store[e.ID] = exp
+		saveToDB(exp)
 	}
 	storeMu.Unlock()
 
@@ -110,6 +162,16 @@ func runExperiments(e Experiments) {
 }
 
 func main() {
+
+	if err := initDB(); err != nil {
+		log.Fatalf("Failed to open db: %v", err)
+	}
+
+	if err := loadFromDB(); err != nil {
+		log.Fatalf("Error loading from db:%v", err)
+	}
+	log.Printf("Loaded %d experiments from disk", len(store))
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
