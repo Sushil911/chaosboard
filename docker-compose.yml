@@ -1,50 +1,56 @@
-version:'3.8'
+version: '3.8'
 
 services:
   chaosboard:
     build: .
-    container_name:'chaosboard-app'
+    container_name: 'chaosboard-app'
     ports:
-      -"127.0.0.1:8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
       - PORT=8080
     volumes:
       - chaosboard_data:/data
-    restart:unless-stopped
+    restart: unless-stopped
     networks:
-      -monitoring
-    read_only:true
-    user:"1000:1000"
+      - monitoring
+    read_only: true
+    user: "1000:1000"
     
   prometheus:
-    image:prom/prometheus:latest
-    container_name:prometheus-monitor
+    image: prom/prometheus:v2.48.0
+    container_name: prometheus-monitor
     ports:
-      -"127.0.0.1:9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
      - prometheus_data:/prometheus
-     -./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    restart:unless-stopped
+     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
-      -monitoring
-    user:nobody
-    read_only:true
+      - monitoring
+    user: nobody
+    read_only: true
   
   grafana:
-    image:grafana/grafana:latest
-    container_name:grafana-dashboard
+    image: grafana/grafana:10.2.3
+    container_name: grafana-dashboard
     ports:
-      -"127.0.0.1:3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
-      -"monitoring"
+      - "monitoring"
     volumes:
-      -grafana_data:/var/lib/grafana
-    restart:unless-stopped
-    user:"472:472"
-    read_only:true
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+    user: "472:472"
+    read_only: true
     depends_on:
       prometheus:
-        condition:service_healthy
+        condition: service_healthy
 
 volumes:
   chaosboard_data:
@@ -52,7 +58,7 @@ volumes:
   grafana_data:
 
 networks:
-  monitoring
+  monitoring:
 
     
     
