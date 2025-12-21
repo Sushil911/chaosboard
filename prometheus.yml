@@ -2,6 +2,6 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  -job_name: 'chaosboard'
-  static_configs:
-    -targets: ['chaosboard:8080']
+  - job_name: 'chaosboard'
+    static_configs:
+      - targets: ['chaosboard:8080']
