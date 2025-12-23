@@ -1,6 +1,8 @@
 services:
   chaosboard:
-    build: .
+    build:
+      context: .
+      target: production
     container_name: 'chaosboard-app'
     ports:
       - "127.0.0.1:8080:8080"
@@ -44,6 +46,8 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
     restart: unless-stopped
+    .env_file:
+      - fileName
     user: "472:472"
     read_only: true
     depends_on:
@@ -57,6 +61,7 @@ volumes:
 
 networks:
   monitoring:
+    driver: bridge
 
     
     

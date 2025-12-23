@@ -1,11 +1,15 @@
 services:
   chaosboard:
-    build: .
+    build:
+      context: .
+      target: development
     container_name: chaosboard-app
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
+      - .:/app
       - ./chaosboard.db:/app/chaosboard.db
+      - go-mod-cache:/go/pkg/mod
     restart: no
 
   prometheus:
@@ -22,7 +26,12 @@ services:
     container_name: grafana_dashboard
     ports:
       - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-changeme}
     restart: no
-    
+
+volumes:
+ go-mod-cache:
+ grafana-data:
