@@ -19,7 +19,7 @@ CMD ["air","-c",".air.toml"]
 
 FROM deps AS builder
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" chaosboard .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o chaosboard .
 
 FROM gcr.io/distroless/static-debian12:nonroot AS production
 COPY --from=builder /app/chaosboard /chaosboard
