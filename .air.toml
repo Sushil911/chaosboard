@@ -1,0 +1,14 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main ."
+  entrypoint = "tmp/main"
+  delay = 1000
+  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  include_ext = ["go", "tpl", "tmpl", "html"]
+  kill_delay = "6s"
+  send_interrupt=true
+
+[log]
+  color = true

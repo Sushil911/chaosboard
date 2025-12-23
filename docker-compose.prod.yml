@@ -1,6 +1,8 @@
 services:
   chaosboard:
-    build: .
+    build:
+      context: .
+      target: production
     container_name: 'chaosboard-app'
     ports:
       - "127.0.0.1:8080:8080"
@@ -57,6 +59,7 @@ volumes:
 
 networks:
   monitoring:
+    driver: bridge
 
     
     
