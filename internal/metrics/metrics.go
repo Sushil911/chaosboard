@@ -38,15 +38,16 @@ var (
 	})
 )
 
-type responsewriter struct {
+type responseWriter struct {
 	http.ResponseWriter
-	status int
+	status  int
+	written bool
 }
 
 func TrackRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		rw := &responsewriter{w, http.StatusOK}
+		rw := &responseWriter{w, http.StatusOK, false}
 		next.ServeHTTP(rw, r)
 
 		HttpRequests.WithLabelValues(
@@ -59,7 +60,18 @@ func TrackRequest(next http.Handler) http.Handler {
 	})
 }
 
-func (rw *responsewriter) WriteHeader(code int) {
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	if !rw.written {
+		rw.WriteHeader(http.StatusOK)
+	}
+	return rw.ResponseWriter.Write(b)
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	if rw.written {
+		return
+	}
 	rw.status = code
+	rw.written = true
 	rw.ResponseWriter.WriteHeader(code)
 }
