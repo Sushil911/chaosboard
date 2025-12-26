@@ -11,6 +11,7 @@ import (
 
 	"chaosboard/internal/api"
 	"chaosboard/internal/db"
+	"chaosboard/internal/metrics"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -32,6 +33,9 @@ func main() {
 	mux.HandleFunc("POST /api/experiments", api.CreateExperiment)
 	mux.HandleFunc("GET /api/experiments", api.ListExperiments)
 	mux.Handle("/metrics", promhttp.Handler())
+
+	var handler http.Handler = mux
+	handler = metrics.TrackRequest(handler)
 
 	server := &http.Server{Addr: ":8080", Handler: mux}
 
