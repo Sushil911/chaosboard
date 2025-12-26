@@ -11,6 +11,7 @@ import (
 
 	"chaosboard/internal/api"
 	"chaosboard/internal/db"
+	"chaosboard/internal/metrics"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -33,7 +34,10 @@ func main() {
 	mux.HandleFunc("GET /api/experiments", api.ListExperiments)
 	mux.Handle("/metrics", promhttp.Handler())
 
-	server := &http.Server{Addr: ":8080", Handler: mux}
+	var handler http.Handler = mux
+	handler = metrics.TrackRequest(handler)
+
+	server := &http.Server{Addr: ":8080", Handler: handler}
 
 	go func() {
 		log.Println("ChaosBoard listening on http://localhost:8080")
