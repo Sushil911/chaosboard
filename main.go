@@ -37,7 +37,7 @@ func main() {
 	var handler http.Handler = mux
 	handler = metrics.TrackRequest(handler)
 
-	server := &http.Server{Addr: ":8080", Handler: mux}
+	server := &http.Server{Addr: ":8080", Handler: handler}
 
 	go func() {
 		log.Println("ChaosBoard listening on http://localhost:8080")

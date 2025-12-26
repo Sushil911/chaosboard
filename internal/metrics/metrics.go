@@ -47,13 +47,13 @@ func TrackRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		rw := &responsewriter{w, http.StatusOK}
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(rw, r)
 
 		HttpRequests.WithLabelValues(
 			r.Method,
 			r.URL.Path,
 			fmt.Sprintf("%d", rw.status),
-		)
+		).Inc()
 
 		HttpDuration.WithLabelValues(r.Method, r.URL.Path).Observe(float64(time.Since(start).Seconds()))
 	})
