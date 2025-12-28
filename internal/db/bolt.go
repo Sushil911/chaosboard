@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"chaosboard/internal/metrics"
 	"chaosboard/internal/models"
 
 	"github.com/google/uuid"
@@ -92,6 +93,7 @@ func Update(exp models.Experiment) {
 	store[exp.ID] = exp
 	storeMu.Unlock()
 	Save(exp)
+	metrics.ExperimentsActive.Dec()
 }
 
 func Create(reqType string, duration int) models.Experiment {
@@ -111,6 +113,8 @@ func Create(reqType string, duration int) models.Experiment {
 	store[exp.ID] = exp
 	storeMu.Unlock()
 	Save(exp)
+
+	metrics.ExperimentsTotal.WithLabelValues(reqType).Inc()
 
 	return exp
 }
