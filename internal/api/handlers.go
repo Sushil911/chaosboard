@@ -20,7 +20,6 @@ func CreateExperiment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	exp := db.Create(req.Type, req.Duration)
-
 	go chaos.Run(exp)
 
 	w.Header().Set("Content-Type", "application/json")

@@ -29,13 +29,20 @@ var (
 		Name: "chaosboard_experiments_total",
 		Help: "Total no. of experiments",
 	},
-		[]string{"type", "status"},
+		[]string{"type"},
 	)
 
-	ExperimentsRunning = promauto.NewGauge(prometheus.GaugeOpts{
+	ExperimentsActive = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "chaosboard_experiments_active",
 		Help: "Total no. of experiments currently running",
 	})
+
+	ExperimentsCompleted = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "chaosboard_experiments_completed",
+		Help: "Completed experiments by result",
+	},
+		[]string{"type", "result"},
+	)
 )
 
 type responseWriter struct {
