@@ -41,7 +41,7 @@ December 2025 has ended, and it's been 23 days since I started learning DevOps +
 
 Total estimated hours: ~90–100. Progress was linear at first with some plateaus (due to skipped days), but it accelerated sharply in the last week as concepts started connecting.
 
-## What actually works today
+## Current Implementation(Dec 31,2025)
 - A basic Go HTTP server running on :8080 with a JSON API
 - Create chaos experiments via `POST /api/experiments` (types: `cpu-hog`, `memory-hog`, `disk-fill`)
 - List experiments via `GET /api/experiments`
