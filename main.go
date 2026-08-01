@@ -27,6 +27,7 @@ func main() {
 	}
 	log.Printf("Loaded %d experiments from disk", len(db.GetStore()))
 
+	// mux router
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", api.RootHandler)
 	mux.HandleFunc("/healthz", api.HealthHandler)
