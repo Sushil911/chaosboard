@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
@@ -92,7 +93,9 @@ func Update(exp models.Experiment) {
 	storeMu.Lock()
 	store[exp.ID] = exp
 	storeMu.Unlock()
-	Save(exp)
+	if err := Save(exp); err != nil {
+		fmt.Printf("Failed to save experiment %s: %v\n", exp.ID, err)
+	}
 	metrics.ExperimentsActive.Dec()
 }
 
@@ -112,7 +115,9 @@ func Create(reqType string, duration int) models.Experiment {
 	storeMu.Lock()
 	store[exp.ID] = exp
 	storeMu.Unlock()
-	Save(exp)
+	if err := Save(exp); err != nil {
+		fmt.Printf("Failed to save experiment %s: %v\n", exp.ID, err)
+	}
 
 	metrics.ExperimentsTotal.WithLabelValues(reqType).Inc()
 

@@ -24,11 +24,15 @@ func CreateExperiment(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(exp)
+	if err := json.NewEncoder(w).Encode(exp); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
 }
 
 func ListExperiments(w http.ResponseWriter, r *http.Request) {
 	list := db.GetAll()
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(list)
+	if err := json.NewEncoder(w).Encode(list); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
 }

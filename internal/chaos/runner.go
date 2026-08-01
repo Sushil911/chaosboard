@@ -57,6 +57,7 @@ func memoryHog(seconds int) error {
 		junk = append(junk, make([]byte, 10*1024*1024)) // 10 MB
 		time.Sleep(100 * time.Millisecond)
 	}
+	_ = len(junk)
 	return nil
 }
 
@@ -65,8 +66,13 @@ func diskFill(seconds int) error {
 	defer os.Remove("chaos_junk.tmp")
 	end := time.Now().Add(time.Duration(seconds) * time.Second)
 	for time.Now().Before(end) {
-		file.Write(make([]byte, 1024*1024)) // 1 MB
-		file.Sync()
+		if _, err := file.Write(make([]byte, 1024*1024)); err != nil {
+			return err
+		}
+
+		if err := file.Sync(); err != nil {
+			return err
+		}
 		time.Sleep(100 * time.Millisecond)
 	}
 	file.Close()
