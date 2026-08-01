@@ -13,7 +13,7 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: [validate]  # ⭐ Waits for validation to complete
+    needs: [validate]  
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
