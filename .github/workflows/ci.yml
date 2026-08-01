@@ -1,0 +1,53 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run golangci-lint (via Docker)
+        run: docker build --target lint .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tests (via Docker)
+        run: docker build --target test .
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build production image
+        run: docker build --target production -t chaosboard:latest .
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Tag image for Docker Hub
+        run: |
+          docker tag chaosboard:latest ${{ secrets.DOCKER_USERNAME }}/chaosboard:latest
+          docker tag chaosboard:latest ${{ secrets.DOCKER_USERNAME }}/chaosboard:${{ github.sha }}
+
+      - name: Push image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/chaosboard:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/chaosboard:${{ github.sha }}
