@@ -96,7 +96,6 @@ func Update(exp models.Experiment) {
 	if err := Save(exp); err != nil {
 		fmt.Printf("Failed to save experiment %s: %v\n", exp.ID, err)
 	}
-	metrics.ExperimentsActive.Dec()
 }
 
 func Create(reqType string, duration int) models.Experiment {
