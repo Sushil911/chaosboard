@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chaosboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chaosboard
+  template:
+    metadata:
+      labels:
+        app: chaosboard
+    spec:
+      containers:
+      - name: chaosboard
+        image: sushil999/chaosboard:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
