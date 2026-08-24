@@ -15,6 +15,7 @@ spec:
       containers:
       - name: chaosboard
         image: sushil999/chaosboard:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
