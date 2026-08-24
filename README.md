@@ -70,5 +70,56 @@ Then visit localhost:8080 for backend app, localhost:3000 for Grafana and localh
 - Sushil, January 2026
 
 
+## Update: Some Ups & Downs (January 1, 2026 – July 31, 2026)
+
+Somewhere along the way I got lost and jumped to other different domains which are way different from this domain that I was learning. So unfortunately I can't document those things in this github profile. But I'll be consistent from this day onwards and give my best to learn.
+
+---
+
+## Update: The Kubernetes Chapter (July 31, 2026 – August 24, 2026)
+After getting the Docker and Docker Compose, I've setup CI/CD using Github Actions then I moved to Kubernetes. I set up a local Kind cluster, wrote deployment YAMLs, and got ChaosBoard running inside the cluster. The rollout strategy now uses the `:latest` tag with `imagePullPolicy: Always` so updates are easy. I also learned how the Control Plane and Worker Nodes work, and how traffic flows from a browser to a pod.
+
+### Current Implementation (Latest)
+* Working Go API with graceful shutdown
+* BoltDB with in-memory cache
+* Multi-stage Dockerfile (dev, builder, production)
+* Docker Compose for local dev (with Prometheus + Grafana)
+* GitHub Actions CI/CD (lint, test, build, push to Docker Hub)
+* Kind cluster running locally
+* ChaosBoard deployed as a Kubernetes Deployment
+* Service exposing ChaosBoard internally
+* Rollout restart with `:latest` image tag
+* Prometheus + Grafana stack running locally (not yet inside K8s)
+
+---
+
+## How to Run It Locally
+
+### With Docker Compose
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
+### With Kubernetes
+```bash
+kind create cluster --config kind-config.yaml --name chaosboard
+kubectl apply -f chaosboard-deployment.yaml
+kubectl apply -f chaosboard-service.yaml
+kubectl port-forward service/chaosboard-service 8080:8080
+```
+
+---
+
+## Future Plans
+* Production-grade chaos experiments (context-aware, cgroup-aware)
+* Deploy Prometheus and Grafana inside the Kubernetes cluster
+* Replace Prometheus client with OpenTelemetry
+* Write a Kubernetes controller and CRD
+* Contribute to Kind or LitmusChaos to learn more
+
+- Sushil, August 2026
+
+
+
 
 
